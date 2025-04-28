@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Service Items - Vehicle Service Management</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h4 class="mb-1">Service Items</h4>
+                                    <p class="text-muted mb-0">
+                                        <span th:text="${serviceRecord.vehicle.make + ' ' + serviceRecord.vehicle.model}"></span>
+                                        (<span th:text="${serviceRecord.vehicle.registrationNumber}"></span>)
+                                    </p>
+                                </div>
+                                <a th:href="@{/service-records/{id}/view(id=${serviceRecord.id})}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left"></i> Back to Service Record
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Alert Messages -->
+                            <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+                                <span th:text="${message}"></span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <span th:text="${error}"></span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+
+                            <!-- Add New Service Item Form -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Add New Service Item</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form th:action="@{/service-items/create}" 
+                                          th:object="${newServiceItem}" method="post"
+                                          class="row g-3 needs-validation" novalidate>
+                                        
+                                        <input type="hidden" name="serviceRecordId" th:value="${serviceRecord.id}" />
+                                        
+                                        <div class="col-md-4">
+                                            <label for="itemName" class="form-label">Item Name</label>
+                                            <input type="text" class="form-control" id="itemName" 
+                                                   th:field="*{itemName}" required
+                                                   th:classappend="${#fields.hasErrors('itemName')} ? 'is-invalid' : ''">
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('itemName')}"
+                                                 th:errors="*{itemName}">Please provide an item name.</div>
+                                        </div>
+                                        
+                                        <div class="col-md-2">
+                                            <label for="quantity" class="form-label">Quantity</label>
+                                            <input type="number" class="form-control" id="quantity" 
+                                                   th:field="*{quantity}" min="1" required
+                                                   th:classappend="${#fields.hasErrors('quantity')} ? 'is-invalid' : ''">
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('quantity')}"
+                                                 th:errors="*{quantity}">Please enter a valid quantity.</div>
+                                        </div>
+                                        
+                                        <div class="col-md-3">
+                                            <label for="unitPrice" class="form-label">Unit Price (₹)</label>
+                                            <input type="number" class="form-control" id="unitPrice" 
+                                                   th:field="*{unitPrice}" min="0" step="0.01" required
+                                                   th:classappend="${#fields.hasErrors('unitPrice')} ? 'is-invalid' : ''">
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('unitPrice')}"
+                                                 th:errors="*{unitPrice}">Please enter a valid unit price.</div>
+                                        </div>
+                                        
+                                        <div class="col-md-3 d-flex align-items-end">
+                                            <button type="submit" class="btn btn-primary w-100">
+                                                <i class="bi bi-plus-circle"></i> Add Item
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="col-12">
+                                            <label for="description" class="form-label">Description</label>
+                                            <textarea class="form-control" id="description" 
+                                                      th:field="*{description}" rows="2"
+                                                      th:classappend="${#fields.hasErrors('description')} ? 'is-invalid' : ''"></textarea>
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}"
+                                                 th:errors="*{description}"></div>
+                                        </div>
+
+                                        <div class="col-12" id="calculatedTotal">
+                                            <p class="mb-0 text-end">
+                                                <strong>Calculated Total: </strong>
+                                                <span>₹</span><span id="totalAmount">0.00</span>
+                                            </p>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Service Items List -->
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">Service Items List</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Item</th>
+                                                    <th>Description</th>
+                                                    <th>Quantity</th>
+                                                    <th>Unit Price</th>
+                                                    <th>Total</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="item : ${serviceItems}">
+                                                    <td th:text="${item.itemName}"></td>
+                                                    <td th:text="${item.description ?: '-'}"></td>
+                                                    <td th:text="${item.quantity}"></td>
+                                                    <td th:text="${'₹' + #numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 2, 'POINT')}"></td>
+                                                    <td th:text="${'₹' + #numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 2, 'POINT')}"></td>
+                                                    <td>
+                                                        <div class="btn-group">
+                                                            <a th:href="@{/service-items/{id}/edit(id=${item.id})}" 
+                                                               class="btn btn-sm btn-outline-primary">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </a>
+                                                            <button type="button" 
+                                                                    class="btn btn-sm btn-outline-danger"
+                                                                    th:onclick="'confirmDelete(' + ${item.id} + ')'">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                        <form th:id="'deleteForm' + ${item.id}"
+                                                              th:action="@{/service-items/{id}/delete(id=${item.id})}"
+                                                              method="post" class="d-none">
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                                <tr th:if="${#lists.isEmpty(serviceItems)}">
+                                                    <td colspan="6" class="text-center">No service items added yet</td>
+                                                </tr>
+                                                <tr th:if="${not #lists.isEmpty(serviceItems)}" class="table-light">
+                                                    <td colspan="4" class="text-end"><strong>Total Amount:</strong></td>
+                                                    <td>
+                                                        <strong th:text="${'₹' + #numbers.formatDecimal(#aggregates.sum(serviceItems.![totalPrice]), 0, 'COMMA', 2, 'POINT')}"></strong>
+                                                    </td>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            function confirmDelete(itemId) {
+                if (confirm('Are you sure you want to delete this service item?')) {
+                    document.getElementById('deleteForm' + itemId).submit();
+                }
+            }
+
+            // Calculate total price when quantity or unit price changes
+            document.getElementById('quantity').addEventListener('input', calculateTotal);
+            document.getElementById('unitPrice').addEventListener('input', calculateTotal);
+
+            function calculateTotal() {
+                const quantity = parseFloat(document.getElementById('quantity').value) || 0;
+                const unitPrice = parseFloat(document.getElementById('unitPrice').value) || 0;
+                const total = quantity * unitPrice;
+                document.getElementById('totalAmount').textContent = total.toFixed(2);
+            }
+
+            // Form validation
+            (function () {
+                'use strict'
+                var forms = document.querySelectorAll('.needs-validation')
+                Array.prototype.slice.call(forms)
+                    .forEach(function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (!form.checkValidity()) {
+                                event.preventDefault()
+                                event.stopPropagation()
+                            }
+                            form.classList.add('was-validated')
+                        }, false)
+                    })
+            })()
+        </script>
+    </th:block>
+</body>
+</html> 

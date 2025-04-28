@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Admin Dashboard - Vehicle Service Management</title>
+    <style>
+        .dashboard-card {
+            transition: transform 0.2s;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+        .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+        .list-group-item {
+            border: none;
+            margin-bottom: 0.5rem;
+            border-radius: 8px !important;
+            transition: all 0.2s;
+        }
+        .list-group-item:hover {
+            transform: translateX(5px);
+            background-color: #f8f9fa;
+        }
+        .badge {
+            padding: 0.5em 1em;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content" class="py-4">
+        <div class="container-fluid">
+            <!-- Welcome Section -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="display-6 mb-3">Welcome to Admin Dashboard</h2>
+                    <p class="text-muted">Here's your service center overview for today</p>
+                </div>
+            </div>
+
+            <!-- Welcome Message -->
+            <div th:if="${welcome}" class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fas fa-handshake me-2"></i>
+                Developed by sonal and welcomes you to vehicle management web app
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="dashboard-card card bg-primary text-white stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">Total Vehicles</h6>
+                                <h2 class="mb-0" th:text="${totalVehicles}">0</h2>
+                            </div>
+                            <i class="bi bi-car-front stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dashboard-card card bg-warning text-white stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">Due for Service</h6>
+                                <h2 class="mb-0" th:text="${vehiclesDueCount}">0</h2>
+                            </div>
+                            <i class="bi bi-exclamation-triangle stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dashboard-card card bg-info text-white stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">In Progress</h6>
+                                <h2 class="mb-0" th:text="${servicesInProgress}">0</h2>
+                            </div>
+                            <i class="bi bi-gear-fill stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="dashboard-card card bg-success text-white stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">Completed</h6>
+                                <h2 class="mb-0" th:text="${completedServices}">0</h2>
+                            </div>
+                            <i class="bi bi-check-circle stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="row g-4">
+                <!-- Vehicles Due for Service -->
+                <div class="col-md-6">
+                    <div class="dashboard-card card h-100">
+                        <div class="card-header bg-white py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Vehicles Due for Service</h5>
+                                <a href="/vehicles/due" class="btn btn-sm btn-outline-primary">View All</a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                <a th:each="vehicle : ${dueVehicles}"
+                                   th:href="@{/vehicles/{id}(id=${vehicle.id})}"
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1" th:text="${vehicle.make + ' ' + vehicle.model}">Vehicle</h6>
+                                            <p class="mb-1 text-muted" th:text="${vehicle.registrationNumber}">Reg Number</p>
+                                            <small th:text="${'Owner: ' + vehicle.customer.firstName + ' ' + vehicle.customer.lastName}">Owner</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-warning" th:text="${#temporals.format(vehicle.nextServiceDate, 'dd MMM')}">Date</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Services -->
+                <div class="col-md-6">
+                    <div class="dashboard-card card h-100">
+                        <div class="card-header bg-white py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Recent Services</h5>
+                                <a href="/service-records" class="btn btn-sm btn-outline-primary">View All</a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                <a th:each="service : ${recentServices}"
+                                   th:href="@{/service-records/{id}/view(id=${service.id})}"
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1" th:text="${service.vehicle.make + ' ' + service.vehicle.model}">Vehicle</h6>
+                                            <p class="mb-1 text-muted" th:text="${service.vehicle.registrationNumber}">Reg Number</p>
+                                            <small th:text="${'Advisor: ' + service.serviceAdvisor.fullName}">Advisor</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span th:class="${'badge ' + 
+                                                (service.status == 'SCHEDULED' ? 'bg-info' : 
+                                                 service.status == 'IN_PROGRESS' ? 'bg-warning' : 
+                                                 service.status == 'COMPLETED' ? 'bg-success' : 'bg-danger')}"
+                                                  th:text="${service.status}">Status</span>
+                                            <br>
+                                            <small class="text-muted" th:text="${#temporals.format(service.serviceDate, 'dd MMM, HH:mm')}">Date</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

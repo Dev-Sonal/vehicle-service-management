@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title th:text="${vehicle.id == null ? 'Add Vehicle' : 'Edit Vehicle'}">Vehicle Form</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container py-5">
+            <div class="bg-white shadow rounded p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                    <h2 class="fw-bold mb-0" th:text="${vehicle.id == null ? 'Add New Vehicle' : 'Edit Vehicle'}"></h2>
+                    <a href="/vehicles" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Vehicles
+                    </a>
+                </div>
+
+                <form th:action="@{${vehicle.id == null ? '/vehicles' : '/vehicles/' + vehicle.id}}" 
+                      method="post" 
+                      th:object="${vehicle}"
+                      class="needs-validation"
+                      novalidate>
+
+                    <!-- Vehicle Details Section -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Vehicle Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="make" class="form-label">Make</label>
+                                    <input type="text" class="form-control" id="make" th:field="*{make}" required>
+                                    <div class="invalid-feedback">Please enter the vehicle make.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="model" class="form-label">Model</label>
+                                    <input type="text" class="form-control" id="model" th:field="*{model}" required>
+                                    <div class="invalid-feedback">Please enter the vehicle model.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="registrationNumber" class="form-label">Registration Number</label>
+                                    <input type="text" class="form-control" id="registrationNumber" th:field="*{registrationNumber}" required>
+                                    <div class="invalid-feedback">Please enter the registration number.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="chassisNumber" class="form-label">Chassis Number</label>
+                                    <input type="text" class="form-control" id="chassisNumber" th:field="*{chassisNumber}" required>
+                                    <div class="invalid-feedback">Please enter the chassis number.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Service Information Section -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Service Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="purchaseDate" class="form-label">Purchase Date</label>
+                                    <input type="date" class="form-control" id="purchaseDate" th:field="*{purchaseDate}" required>
+                                    <div class="invalid-feedback">Please select the purchase date.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="lastServiceDate" class="form-label">Last Service Date</label>
+                                    <input type="date" class="form-control" id="lastServiceDate" th:field="*{lastServiceDate}" required>
+                                    <div class="invalid-feedback">Please select the last service date.</div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="nextServiceDate" class="form-label">Next Service Date</label>
+                                    <input type="date" class="form-control" id="nextServiceDate" th:field="*{nextServiceDate}" required>
+                                    <div class="invalid-feedback">Please select the next service date.</div>
+                                </div>
+                                <div class="col-12">
+                                    <label for="customer" class="form-label">Customer</label>
+                                    <select class="form-select" id="customer" th:field="*{customer}" required>
+                                        <option value="">Select Customer</option>
+                                        <option th:each="customer : ${customers}"
+                                                th:value="${customer.id}"
+                                                th:text="${customer.firstName + ' ' + customer.lastName}">
+                                        </option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a customer.</div>
+                                </div>
+                                <div class="col-12">
+                                    <label for="serviceAdvisor" class="form-label">Service Advisor</label>
+                                    <select class="form-select" id="serviceAdvisor" th:field="*{serviceAdvisor}">
+                                        <option value="">Select Service Advisor</option>
+                                        <option th:each="advisor : ${serviceAdvisors}"
+                                                th:value="${advisor.id}"
+                                                th:text="${advisor.firstName + ' ' + advisor.lastName}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Details Section -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Additional Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="color" class="form-label">Color</label>
+                                    <input type="text" class="form-control" id="color" th:field="*{color}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="engineNumber" class="form-label">Engine Number</label>
+                                    <input type="text" class="form-control" id="engineNumber" th:field="*{engineNumber}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="fuelType" class="form-label">Fuel Type</label>
+                                    <select class="form-select" id="fuelType" th:field="*{fuelType}">
+                                        <option value="">Select Fuel Type</option>
+                                        <option value="PETROL">Petrol</option>
+                                        <option value="DIESEL">Diesel</option>
+                                        <option value="ELECTRIC">Electric</option>
+                                        <option value="HYBRID">Hybrid</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="transmissionType" class="form-label">Transmission Type</label>
+                                    <select class="form-select" id="transmissionType" th:field="*{transmissionType}">
+                                        <option value="">Select Transmission Type</option>
+                                        <option value="MANUAL">Manual</option>
+                                        <option value="AUTOMATIC">Automatic</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-3">
+                        <a href="/vehicles" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="bi bi-save"></i> Save Vehicle
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            // Bootstrap form validation
+            (function () {
+                'use strict'
+                var forms = document.querySelectorAll('.needs-validation')
+                Array.prototype.slice.call(forms).forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+            })()
+        </script>
+    </th:block>
+</body>
+</html>

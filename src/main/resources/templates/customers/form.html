@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title th:text="${customer.id == null ? 'Add Customer' : 'Edit Customer'}">Customer Form</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container py-4">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0" th:text="${customer.id == null ? 'Add New Customer' : 'Edit Customer'}"></h5>
+                                <a href="/customers" class="btn btn-outline-light btn-sm">
+                                    <i class="bi bi-arrow-left"></i> Back to Customers
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <form th:action="@{${customer.id == null ? '/customers' : '/customers/' + customer.id}}"
+                                  method="post"
+                                  th:object="${customer}"
+                                  class="needs-validation"
+                                  novalidate>
+
+                                <!-- Personal Information -->
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-3">Personal Information</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="firstName" class="form-label">First Name</label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   id="firstName"
+                                                   th:field="*{firstName}"
+                                                   th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid' : ''"
+                                                   required>
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}">
+                                                Please enter first name
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="lastName" class="form-label">Last Name</label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   id="lastName"
+                                                   th:field="*{lastName}"
+                                                   th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid' : ''"
+                                                   required>
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}">
+                                                Please enter last name
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Contact Information -->
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-3">Contact Information</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email"
+                                                   class="form-control"
+                                                   id="email"
+                                                   th:field="*{email}"
+                                                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                                   required>
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">
+                                                Please enter a valid email
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="phoneNumber" class="form-label">Phone Number</label>
+                                            <input type="tel"
+                                                   class="form-control"
+                                                   id="phoneNumber"
+                                                   th:field="*{phoneNumber}"
+                                                   th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid' : ''"
+                                                   required>
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}">
+                                                Please enter a valid phone number
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Address -->
+                                <div class="mb-4">
+                                    <h6 class="fw-bold mb-3">Address</h6>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <label for="address" class="form-label">Full Address</label>
+                                            <textarea class="form-control"
+                                                      id="address"
+                                                      th:field="*{address}"
+                                                      th:classappend="${#fields.hasErrors('address')} ? 'is-invalid' : ''"
+                                                      rows="3"
+                                                      required></textarea>
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('address')}" th:errors="*{address}">
+                                                Please enter address
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="/customers" class="btn btn-light">Cancel</a>
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        <i class="bi bi-save"></i> Save Customer
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            // Form validation
+            (function () {
+                'use strict'
+                var forms = document.querySelectorAll('.needs-validation')
+                Array.prototype.slice.call(forms).forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+            })()
+        </script>
+    </th:block>
+</body>
+</html> 

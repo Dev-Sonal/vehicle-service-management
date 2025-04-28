@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Service Records - Vehicle Service Management</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container py-5">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold mb-0">Service Records</h2>
+                <div class="d-flex gap-2">
+                    <a href="/service-records/new" class="btn btn-primary" sec:authorize="hasRole('SERVICE_ADVISOR')">
+                        <i class="bi bi-plus-lg"></i> New Service Record
+                    </a>
+                </div>
+            </div>
+
+            <!-- Search and Filter Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Vehicle Search -->
+                        <div class="col-md-4">
+                            <form th:action="@{/service-records/search}" method="get" class="d-flex gap-2">
+                                <input type="text" name="registrationNumber" class="form-control" 
+                                       placeholder="Search by Registration Number">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </form>
+                        </div>
+                        <!-- Status Filter -->
+                        <div class="col-md-4">
+                            <select id="statusFilter" class="form-select" onchange="filterByStatus(this.value)">
+                                <option value="">All Statuses</option>
+                                <option value="SCHEDULED">Scheduled</option>
+                                <option value="IN_PROGRESS">In Progress</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="CANCELLED">Cancelled</option>
+                            </select>
+                        </div>
+                        <!-- Date Filter -->
+                        <div class="col-md-4">
+                            <input type="date" id="dateFilter" class="form-control" 
+                                   onchange="filterByDate(this.value)"
+                                   th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Records Table -->
+            <div class="card shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Service ID</th>
+                                <th>Vehicle</th>
+                                <th>Customer</th>
+                                <th>Service Date</th>
+                                <th>Status</th>
+                                <th>Total Cost</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="record : ${serviceRecords}">
+                                <td th:text="${record.id}"></td>
+                                <td>
+                                    <div th:text="${record.vehicle.make + ' ' + record.vehicle.model}"></div>
+                                    <small class="text-muted" th:text="${record.vehicle.registrationNumber}"></small>
+                                </td>
+                                <td th:text="${record.vehicle.customer.firstName + ' ' + record.vehicle.customer.lastName}"></td>
+                                <td th:text="${#temporals.format(record.serviceDate, 'dd-MM-yyyy')}"></td>
+                                <td>
+                                    <span th:class="${'badge ' + 
+                                        (record.status == 'SCHEDULED' ? 'bg-warning' : 
+                                        (record.status == 'IN_PROGRESS' ? 'bg-primary' : 
+                                        (record.status == 'COMPLETED' ? 'bg-success' : 'bg-danger')))}">
+                                        <i class="bi" th:classappend="${
+                                            record.status == 'SCHEDULED' ? 'bi-calendar-check' :
+                                            (record.status == 'IN_PROGRESS' ? 'bi-gear-fill' :
+                                            (record.status == 'COMPLETED' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'))}">
+                                        </i>
+                                        <span th:text="${record.status}"></span>
+                                    </span>
+                                </td>
+                                <td th:text="${'₹' + #numbers.formatDecimal(record.totalCost, 0, 'COMMA', 2, 'POINT')}"></td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a th:href="@{/service-records/{id}/view(id=${record.id})}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a th:href="@{/service-records/{id}/edit(id=${record.id})}" 
+                                           class="btn btn-sm btn-outline-secondary"
+                                           sec:authorize="hasRole('SERVICE_ADVISOR')">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form th:action="@{/service-records/{id}/delete(id=${record.id})}" 
+                                              method="post" 
+                                              class="d-inline"
+                                              sec:authorize="hasRole('SERVICE_ADVISOR')"
+                                              onsubmit="return confirm('Are you sure you want to delete this service record?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(serviceRecords)}">
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="bi bi-inbox fs-2"></i>
+                                        <p class="mt-2">No service records found</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            function filterByStatus(status) {
+                window.location.href = `/service-records?status=${status}`;
+            }
+
+            function filterByDate(date) {
+                window.location.href = `/service-records?date=${date}`;
+            }
+        </script>
+    </th:block>
+</body>
+</html> 

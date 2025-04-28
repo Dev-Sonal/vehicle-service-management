@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title th:text="${serviceRecord.id == null ? 'Create Service Record' : 'Edit Service Record'}">Service Record Form</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white py-3">
+                            <h4 class="card-title mb-0" th:text="${serviceRecord.id == null ? 'Create Service Record' : 'Edit Service Record'}">
+                                Service Record Form
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="${serviceRecord.id == null ? '/service-records' : '/service-records/' + serviceRecord.id}"
+                                  th:object="${serviceRecord}" method="post">
+                                
+                                <!-- Vehicle Selection -->
+                                <div class="mb-3">
+                                    <label for="vehicle" class="form-label">Vehicle</label>
+                                    <select class="form-select" id="vehicle" th:field="*{vehicle}" required>
+                                        <option value="">Select Vehicle</option>
+                                        <option th:each="vehicle : ${vehicles}"
+                                                th:value="${vehicle.id}"
+                                                th:text="${vehicle.make + ' ' + vehicle.model + ' (' + vehicle.registrationNumber + ')'}">
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Service Date and Time -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="serviceDate" class="form-label">Service Date</label>
+                                        <input type="datetime-local" class="form-control" id="serviceDate" 
+                                               th:field="*{serviceDate}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="completionDate" class="form-label">Expected Completion</label>
+                                        <input type="datetime-local" class="form-control" id="completionDate" 
+                                               th:field="*{completionDate}" required>
+                                    </div>
+                                </div>
+
+                                <!-- Service Status -->
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" id="status" th:field="*{status}" required>
+                                        <option th:each="status : ${statuses}"
+                                                th:value="${status}"
+                                                th:text="${status}">
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Notes -->
+                                <div class="mb-3">
+                                    <label for="notes" class="form-label">Service Notes</label>
+                                    <textarea class="form-control" id="notes" th:field="*{notes}" rows="3"></textarea>
+                                </div>
+
+                                <!-- Total Cost -->
+                                <div class="mb-3">
+                                    <label for="totalCost" class="form-label">Total Cost</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        <input type="number" class="form-control" id="totalCost" 
+                                               th:field="*{totalCost}" step="0.01" min="0">
+                                    </div>
+                                </div>
+
+                                <!-- Payment Status -->
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="paymentProcessed" 
+                                               th:field="*{paymentProcessed}">
+                                        <label class="form-check-label" for="paymentProcessed">
+                                            Payment Processed
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Form Actions -->
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-save"></i> Save Service Record
+                                    </button>
+                                    <a href="/service-records" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x"></i> Cancel
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            // Set minimum date for service date to today
+            document.getElementById('serviceDate').min = new Date().toISOString().slice(0, 16);
+            
+            // Set minimum date for completion date based on service date
+            document.getElementById('serviceDate').addEventListener('change', function() {
+                document.getElementById('completionDate').min = this.value;
+            });
+        </script>
+    </th:block>
+</body>
+</html> 

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Service Advisor Dashboard - Vehicle Service Management</title>
+    <style>
+        .dashboard-card {
+            transition: transform 0.2s;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+        .list-group-item {
+            border: none;
+            margin-bottom: 0.5rem;
+            border-radius: 8px !important;
+            transition: all 0.2s;
+        }
+        .list-group-item:hover {
+            transform: translateX(5px);
+            background-color: #f8f9fa;
+        }
+        .badge {
+            padding: 0.5em 1em;
+        }
+        .service-table th {
+            background-color: #f8f9fa;
+            border: none;
+        }
+        .service-table td {
+            vertical-align: middle;
+        }
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content" class="py-4">
+        <div class="container-fluid">
+            <!-- Welcome Section -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="display-6 mb-3">Service Advisor Dashboard</h2>
+                    <p class="text-muted">Manage today's services and track ongoing work</p>
+                </div>
+            </div>
+
+            <!-- Today's Services -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="dashboard-card card">
+                        <div class="card-header bg-white py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Today's Services</h5>
+                                <a href="/service-records/new" class="btn btn-primary action-btn">
+                                    <i class="bi bi-plus-circle me-2"></i>Schedule New Service
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped service-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Vehicle</th>
+                                            <th>Customer</th>
+                                            <th>Status</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="service : ${todayServices}">
+                                            <td>
+                                                <span class="fw-bold" th:text="${#temporals.format(service.serviceDate, 'HH:mm')}">Time</span>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <span class="fw-bold" th:text="${service.vehicle.make + ' ' + service.vehicle.model}">Vehicle</span>
+                                                    <br>
+                                                    <small class="text-muted" th:text="${service.vehicle.registrationNumber}">Reg Number</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div th:text="${service.vehicle.customer.firstName + ' ' + service.vehicle.customer.lastName}">Customer</div>
+                                                <small class="text-muted" th:text="${service.vehicle.customer.phoneNumber}">Phone</small>
+                                            </td>
+                                            <td>
+                                                <span th:class="${'badge ' + 
+                                                    (service.status == 'SCHEDULED' ? 'bg-info' : 
+                                                     service.status == 'IN_PROGRESS' ? 'bg-warning' : 
+                                                     service.status == 'COMPLETED' ? 'bg-success' : 'bg-danger')}"
+                                                      th:text="${service.status}">Status</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <a th:href="@{/service-records/{id}/edit(id=${service.id})}" 
+                                                   class="btn btn-sm btn-outline-primary me-2">
+                                                   <i class="bi bi-pencil me-1"></i>Update
+                                                </a>
+                                                <a th:href="@{/service-items/record/{id}(id=${service.id})}" 
+                                                   class="btn btn-sm btn-outline-info">
+                                                   <i class="bi bi-list-check me-1"></i>Items
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services In Progress and Completed Services -->
+            <div class="row g-4">
+                <!-- Services In Progress -->
+                <div class="col-md-6">
+                    <div class="dashboard-card card h-100">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0">Services In Progress</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                <a th:each="service : ${inProgressServices}"
+                                   th:href="@{/service-records/{id}/view(id=${service.id})}"
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1" th:text="${service.vehicle.make + ' ' + service.vehicle.model}">Vehicle</h6>
+                                            <p class="mb-1 text-muted" th:text="${service.vehicle.registrationNumber}">Reg Number</p>
+                                            <small th:text="${'Customer: ' + service.vehicle.customer.firstName + ' ' + service.vehicle.customer.lastName}">Customer</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-warning">In Progress</span>
+                                            <br>
+                                            <small class="text-muted" th:text="${#temporals.format(service.serviceDate, 'HH:mm')}">Time</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recently Completed Services -->
+                <div class="col-md-6">
+                    <div class="dashboard-card card h-100">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0">Recently Completed Services</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                <a th:each="service : ${completedServices}"
+                                   th:href="@{/service-records/{id}/view(id=${service.id})}"
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1" th:text="${service.vehicle.make + ' ' + service.vehicle.model}">Vehicle</h6>
+                                            <p class="mb-1 text-muted" th:text="${service.vehicle.registrationNumber}">Reg Number</p>
+                                            <small th:text="${'Customer: ' + service.vehicle.customer.firstName + ' ' + service.vehicle.customer.lastName}">Customer</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <span th:class="${service.paymentProcessed ? 'badge bg-success' : 'badge bg-warning'}"
+                                                  th:text="${service.paymentProcessed ? 'Paid' : 'Payment Pending'}">Payment Status</span>
+                                            <br>
+                                            <small class="text-muted" th:text="${#temporals.format(service.completionDate, 'dd MMM, HH:mm')}">Date</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

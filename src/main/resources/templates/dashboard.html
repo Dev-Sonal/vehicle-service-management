@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/base}">
+<head>
+    <title>Dashboard - Vehicle Service Management</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Vehicles Due for Service</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <a th:each="vehicle : ${dueVehicles}" 
+                               th:href="@{/vehicles/{id}(id=${vehicle.id})}"
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1" th:text="${vehicle.make + ' ' + vehicle.model}"></h6>
+                                    <small th:text="${vehicle.nextServiceDate}"></small>
+                                </div>
+                                <p class="mb-1" th:text="${vehicle.registrationNumber}"></p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Vehicles Under Service</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <a th:each="record : ${inProgressRecords}"
+                               th:href="@{/service-records/{id}(id=${record.id})}"
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1" th:text="${record.vehicle.make + ' ' + record.vehicle.model}"></h6>
+                                    <small th:text="${record.serviceDate}"></small>
+                                </div>
+                                <p class="mb-1" th:text="${record.vehicle.registrationNumber}"></p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Recently Completed Services</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group">
+                            <a th:each="record : ${completedRecords}"
+                               th:href="@{/service-records/{id}(id=${record.id})}"
+                               class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1" th:text="${record.vehicle.make + ' ' + record.vehicle.model}"></h6>
+                                    <small th:text="${record.completionDate}"></small>
+                                </div>
+                                <p class="mb-1" th:text="${record.vehicle.registrationNumber}"></p>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
