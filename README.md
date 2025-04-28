@@ -5,7 +5,7 @@ A comprehensive Spring Boot application for managing vehicle service operations,
 ## Features
 
 - User authentication and authorization
-- Role-based access control (Admin, Service Advisor, Customer)
+- Role-based access control (Admin, Service Advisor)
 - Vehicle management
 - Service record tracking
 - Customer management
